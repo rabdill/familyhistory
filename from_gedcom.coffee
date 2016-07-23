@@ -107,4 +107,6 @@ for person in processed when person.number
   \\paragraph lalala
   """
 
-fs.writeFileSync 'results.tex', results
+template = fs.readFileSync('template.tex').toString()
+combined = template.replace '*****FAMILY_GOES_HERE*****', results
+fs.writeFileSync 'results.tex', combined

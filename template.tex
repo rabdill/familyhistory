@@ -1,0 +1,55 @@
+\documentclass{book}
+\usepackage{textcomp}   % for fractions
+\pagestyle{plain} % just page number, no chapter in page headers
+\renewcommand{\contentsname}{Ancestor Table} % Rename TOC 
+ 
+ 
+% remove the line break after section headings (people's names):
+\usepackage{titlesec} 
+\titleformat{\section}[runin]{\Large\bfseries}{\thesection.}{3pt}{}[\vspace{5mm}]
+
+% then define the new template for declaring a person using the new format:
+\newcommand{\person}[2]{%
+% a bit of space, then a horizontal rule:
+\vspace{2mm}%
+\noindent\hfil\rule{0.5\textwidth}{.4pt}\hfil%
+% section headers are printed differently if there's no ahnentafel number:
+\ifthenelse{\equal{#2}{}}%
+% if there's no ahnentafel number specified:
+{%
+  \section*{#1}%
+  \addcontentsline{toc}{section}{\hspace{6mm}#1}}% (indent a little to make up for lack of number)
+% if there is a number specified::
+{%
+  \section*{#1}\llap{\textit{Ref #2}}%
+  \addcontentsline{toc}{section}{#2 #1}}%
+}
+
+
+\usepackage{enumitem}
+\setlist{nosep} % or \setlist{noitemsep} to leave space around whole list
+\usepackage[utf8]{inputenc}
+\usepackage{biblatex}   % TODO: find out why everything
+                        % breaks if this line gets deleted
+%\usepackage{graphicx}
+%\graphicspath{ {images/} }
+%\usepackage{wrapfig}
+
+\title{Ancestors of Some Person on the Internet}
+\author{A Charming Person of the Present Day}
+\date{2016}
+
+\begin{document}
+
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+%-------------------------------------------
+\mainmatter
+
+*****FAMILY_GOES_HERE*****
+
+
+\end{document}
