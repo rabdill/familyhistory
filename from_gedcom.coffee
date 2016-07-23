@@ -57,7 +57,7 @@ for person in ged
         addition.parentFams = latexFilter point.data
       when 'FAMS'
         addition.fams = latexFilter point.data
-  processed.push addition
+  processed.push addition if addition.name
 
 # Traverse tree
 root = _.find processed, 'name': 'Richard John Abdill III'
