@@ -22,3 +22,7 @@ module.exports =
     point.data or _.find(point.tree, 'tag': tag)?.data or ''
 
   nameFormat: (str) -> str.replace /\//g, ''
+
+  prepCites: (val) ->
+    # converts a value into an object that can have citations attached
+    if val then value: val, citation: [] else value: val

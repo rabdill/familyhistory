@@ -1,9 +1,9 @@
 parser = require 'parse-gedcom'
 fs = require 'fs'
 _ = require 'lodash'
-{latexFilter, findInTree, findMainValue, nameFormat} = require './utility'
+{latexFilter, findInTree, findMainValue, nameFormat, prepCites} = require './utility'
 
-processParents = (person) ->
+processRelations = (person) ->
     console.log person.name
     parents = _.filter processed, 'fams': person.parentFams
     dad = _.find parents, 'sex': 'M'
@@ -22,8 +22,8 @@ processParents = (person) ->
     else
       person.mother = 'unknown'
 
-    processParents dad if dad
-    processParents mom if mom
+    processRelations dad if dad
+    processRelations mom if mom
 
 # load the GEDCOM file
 raw = fs.readFileSync('abdills.ged').toString()
@@ -43,12 +43,12 @@ for person in ged
     switch point.tag
       when 'BIRT'
         addition.birth =
-          date: latexFilter findMainValue point, 'DATE'
-          place: latexFilter findInTree point, 'PLAC'
+          date: prepCites latexFilter findMainValue point, 'DATE'
+          place: prepCites latexFilter findInTree point, 'PLAC'
       when 'DEAT'
         addition.death =
-          date: latexFilter findMainValue point, 'DATE'
-          place: latexFilter findInTree point, 'PLAC'
+          date: prepCites latexFilter findMainValue point, 'DATE'
+          place: prepCites latexFilter findInTree point, 'PLAC'
       when 'NAME'
         addition.name = latexFilter nameFormat point.data
       when 'SEX'
@@ -60,10 +60,13 @@ for person in ged
   processed.push addition
 
 # Traverse tree
-cur = _.find processed, 'name': 'Richard John Abdill III'
-cur.number = 1
-cur.generation = 1
-processParents cur
+root = _.find processed, 'name': 'Richard John Abdill III'
+root.number = 1
+root.generation = 1
+processRelations root
+
+interim = _.filter processed, 'number'
+fs.writeFileSync 'interim.json', JSON.stringify _.sortBy(processed, 'number'), null, 2
 
 # WRITE THE LATEX FILE
 results = ''
