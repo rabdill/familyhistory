@@ -1,6 +1,11 @@
 node_modules
 *.ged
+
 *.json
 !package.json
+
 *.tex
 !template.tex
+
+*.pdf
+*.gz

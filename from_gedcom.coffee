@@ -1,55 +1,44 @@
 parser = require 'parse-gedcom'
 fs = require 'fs'
 _ = require 'lodash'
-
-raw = fs.readFileSync('abdills.ged').toString()
-ged = parser.parse raw
-prettyPrint = (str) -> JSON.stringify str, null, 2
-
-#fs.writeFileSync 'interim.json', prettyPrint ged
-
-
-latexFilter = (str) ->
-  # escape special characters
-  str.replace /([\&\%\$\#\_\{\}\~\^\\])/g, "\\$1"
-
-findInTree = (point, tag) -> _.find(point.tree, 'tag': tag)?.data or ''
-
-findMainValue = (point, tag) ->
-  # This function is for some properties, 'BIRT' for example,
-  # that may have their value stored either as the 'data'
-  # property or from within a tree. For BIRT, the date is
-  # either in point.data OR inside point.tree with a tag of
-  # 'DATE'. This lets us grab whichever one fits---it needs
-  # to be separate from the findInTree method because we may
-  # not want point.data for EVERY answer -- birthplace, for
-  # example, will ONLY be in a tree, and never stored in
-  # point.data
-  point.data or findInTree point, tag
+{latexFilter, findInTree, findMainValue, nameFormat} = require './utility'
 
 processParents = (person) ->
-  console.log person.name
-  parents = _.filter processed, 'fams': person.parentFams
-  dad = _.find parents, 'sex': 'M'
-  mom = _.find parents, 'sex': 'F'
-  if dad
-    dad.number = person.number * 2
-    dad.generation = person.generation + 1
-    person.father = dad.name
-  if mom
-    mom.number = (person.number * 2) + 1
-    mom.generation = person.generation + 1
-    person.mother = mom.name
+    console.log person.name
+    parents = _.filter processed, 'fams': person.parentFams
+    dad = _.find parents, 'sex': 'M'
+    mom = _.find parents, 'sex': 'F'
+    if dad
+      dad.number = person.number * 2
+      dad.generation = person.generation + 1
+      person.father = dad.name
+    else
+      person.father = 'unknown'
 
-  processParents dad if dad
-  processParents mom if mom
+    if mom
+      mom.number = (person.number * 2) + 1
+      mom.generation = person.generation + 1
+      person.mother = mom.name
+    else
+      person.mother = 'unknown'
 
-#-------------------------------
+    processParents dad if dad
+    processParents mom if mom
 
+# load the GEDCOM file
+raw = fs.readFileSync('abdills.ged').toString()
+ged = parser.parse raw
 processed = []
 
 for person in ged
-  addition = {}
+  addition =
+    name: ''
+    birth:
+      date: 'unknown'
+      place: ''
+    death:
+      date: 'unknown'
+      place: ''
   for point in person.tree
     switch point.tag
       when 'BIRT'
@@ -61,7 +50,7 @@ for person in ged
           date: latexFilter findMainValue point, 'DATE'
           place: latexFilter findInTree point, 'PLAC'
       when 'NAME'
-        addition.name = latexFilter point.data
+        addition.name = latexFilter nameFormat point.data
       when 'SEX'
         addition.sex = latexFilter point.data
       when 'FAMC'
@@ -71,22 +60,20 @@ for person in ged
   processed.push addition
 
 # Traverse tree
-cur = _.find processed, 'name': 'Richard John /Abdill/ III'
+cur = _.find processed, 'name': 'Richard John Abdill III'
 cur.number = 1
 cur.generation = 1
 processParents cur
 
-fs.writeFileSync 'final.json', prettyPrint processed
-
 # WRITE THE LATEX FILE
 results = ''
 
-for person in processed when person.number
+for person in _.sortBy(processed, 'number') when person.number
   results += """
   \\person{#{person.name}}{#{person.generation}-#{person.number}}
   \\begin{description}
-      \\item[Birth] #{person.birth?.date} #{person.birth?.place}
-      \\item[Death] #{person.death?.date} #{person.death?.place}
+      \\item[Birth] #{person.birth?.date}#{if person.birth?.date and person.birth?.place then ', ' else ''}#{person.birth?.place}
+      \\item[Death] #{person.death?.date}#{if person.death?.date and person.death?.place then ', ' else ''}#{person.death?.place}
       \\item[Spouse] 
       \\item[Father] #{person.father}
       \\item[Mother] #{person.mother}
