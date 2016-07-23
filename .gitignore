@@ -1,4 +1,5 @@
 node_modules
 *.ged
 *.json
-!package.json
+	!package.json
+*.tex

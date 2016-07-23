@@ -8,6 +8,11 @@ prettyPrint = (str) -> JSON.stringify str, null, 2
 
 #fs.writeFileSync 'interim.json', prettyPrint ged
 
+
+latexFilter = (str) ->
+  # escape special characters
+  str.replace /([\&\%\$\#\_\{\}\~\^\\])/g, "\\$1"
+
 findInTree = (point, tag) -> _.find(point.tree, 'tag': tag)?.data or ''
 
 findMainValue = (point, tag) ->
@@ -21,7 +26,6 @@ findMainValue = (point, tag) ->
   # example, will ONLY be in a tree, and never stored in
   # point.data
   point.data or findInTree point, tag
-
 
 processParents = (person) ->
   console.log person.name
@@ -40,6 +44,8 @@ processParents = (person) ->
   processParents dad if dad
   processParents mom if mom
 
+#-------------------------------
+
 processed = []
 
 for person in ged
@@ -48,20 +54,20 @@ for person in ged
     switch point.tag
       when 'BIRT'
         addition.birth =
-          date: findMainValue point, 'DATE'
-          place: findInTree point, 'PLAC'
+          date: latexFilter findMainValue point, 'DATE'
+          place: latexFilter findInTree point, 'PLAC'
       when 'DEAT'
-        addition.birth =
-          date: findMainValue point, 'DATE'
-          place: findInTree point, 'PLAC'
+        addition.death =
+          date: latexFilter findMainValue point, 'DATE'
+          place: latexFilter findInTree point, 'PLAC'
       when 'NAME'
-        addition.name = point.data
+        addition.name = latexFilter point.data
       when 'SEX'
-        addition.sex = point.data
+        addition.sex = latexFilter point.data
       when 'FAMC'
-        addition.parentFams = point.data
+        addition.parentFams = latexFilter point.data
       when 'FAMS'
-        addition.fams = point.data
+        addition.fams = latexFilter point.data
   processed.push addition
 
 # Traverse tree
@@ -71,3 +77,34 @@ cur.generation = 1
 processParents cur
 
 fs.writeFileSync 'final.json', prettyPrint processed
+
+# WRITE THE LATEX FILE
+results = ''
+
+for person in processed when person.number
+  results += """
+  \\person{#{person.name}}{#{person.generation}-#{person.number}}
+  \\begin{description}
+      \\item[Birth] #{person.birth?.date} #{person.birth?.place}
+      \\item[Death] #{person.death?.date} #{person.death?.place}
+      \\item[Spouse] 
+      \\item[Father] #{person.father}
+      \\item[Mother] #{person.mother}
+      \\item[Residence]\\mbox{}
+          \\begin{description}
+              \\item[1900] somewhere
+          \\end{description}
+      \\item[Children]
+          \\begin{description}
+              \\item[with #{if person.spouse then person.spouse.name else 'spouse'}]\\mbox{}
+                  \\begin{itemize}
+                      \\item 
+                  \\end{itemize}
+          \\end{description}
+  \\end{description}
+
+
+  \\paragraph lalala
+  """
+
+fs.writeFileSync 'results.tex', results
