@@ -5,6 +5,12 @@ _ = require 'lodash'
 
 processRelations = (person) ->
     console.log person.name
+
+    # spouse
+    personFam = _.filter processed, 'fams': person.fams
+    person.spouse = prepCites _.find(personFam, (p) -> p.name isnt person.name)?.name
+
+    # parents:
     parents = _.filter processed, 'fams': person.parentFams
     dad = _.find parents, 'sex': 'M'
     mom = _.find parents, 'sex': 'F'
@@ -34,11 +40,17 @@ for person in ged
   addition =
     name: ''
     birth:
-      date: 'unknown'
+      date:
+        value: 'unknown'
+        citation: []
       place: ''
     death:
-      date: 'unknown'
-      place: ''
+      date:
+        value: 'unknown'
+        citation: []
+      place:
+        value: ''
+        citation: []
   for point in person.tree
     switch point.tag
       when 'BIRT'
@@ -67,36 +79,3 @@ processRelations root
 
 interim = _.filter processed, 'number'
 fs.writeFileSync 'interim.json', JSON.stringify _.sortBy(processed, 'number'), null, 2
-
-# WRITE THE LATEX FILE
-results = ''
-
-for person in _.sortBy(processed, 'number') when person.number
-  results += """
-  \\person{#{person.name}}{#{person.generation}-#{person.number}}
-  \\begin{description}
-      \\item[Birth] #{person.birth?.date}#{if person.birth?.date and person.birth?.place then ', ' else ''}#{person.birth?.place}
-      \\item[Death] #{person.death?.date}#{if person.death?.date and person.death?.place then ', ' else ''}#{person.death?.place}
-      \\item[Spouse] 
-      \\item[Father] #{person.father}
-      \\item[Mother] #{person.mother}
-      \\item[Residence]\\mbox{}
-          \\begin{description}
-              \\item[1900] somewhere
-          \\end{description}
-      \\item[Children]
-          \\begin{description}
-              \\item[with #{if person.spouse then person.spouse.name else 'spouse'}]\\mbox{}
-                  \\begin{itemize}
-                      \\item 
-                  \\end{itemize}
-          \\end{description}
-  \\end{description}
-
-
-  \\paragraph lalala
-  """
-
-template = fs.readFileSync('template.tex').toString()
-combined = template.replace '*****FAMILY_GOES_HERE*****', results
-fs.writeFileSync 'results.tex', combined
