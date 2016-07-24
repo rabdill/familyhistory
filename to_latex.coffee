@@ -6,13 +6,18 @@ sources = require './sources'
 formatting =
   census: (r) ->
     if r.included is true
-      "#{r.year} U.S. census, #{r.county} County, #{r.state}, #{r.division}, dwell. #{r.dwelling}, fam. #{r.family}; #{r.of_interest}."
+      "#{r.year} U.S. census, #{r.county} Co., #{r.state}, #{r.division}, dwell. #{r.dwelling}, fam. #{r.family}; #{r.of_interest}."
     else
       r.included = true
       result = "#{r.year} U.S. census, #{r.county} County, #{r.state}, population schedule, #{r.division}, p. #{r.page}, dwelling #{r.dwelling}, family #{r.family}; #{r.of_interest}; image, Ancestry.com (\\url{#{r.url}} : accessed #{r.accessed})"
       result += "; citing FHL microfilm #{r.microfilm}" if r.microfilm?
       result += "."
-
+  findagrave: (r) ->
+    if r.included is true
+      "\\textit{Find A Grave}, memorial #{r.number}; #{r.names}; gravestone added by #{r.credit}."
+    else
+      r.included = true
+      "\\textit{Find A Grave}, database with images (\\url{https://www.findagrave.com/cgi-bin/fg.cgi?page=gr&amp;GRid=#{r.number}} : accessed #{r.accessed}), memorial #{r.number}; #{r.names}; #{r.cemetery}, #{r.location}; gravestone added by #{r.credit}."
 getSourceString = (title) ->
   "\\footnote{#{formatting[sources[title].type] sources[title]}}"
 
