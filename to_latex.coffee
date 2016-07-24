@@ -9,7 +9,9 @@ formatting =
       "#{r.year} U.S. census, #{r.county} County, #{r.state}, #{r.division}, dwell. #{r.dwelling}, fam. #{r.family}; #{r.of_interest}."
     else
       r.included = true
-      "#{r.year} U.S. census, #{r.county} County, #{r.state}, population schedule, #{r.division}, p. #{r.page}, dwelling #{r.dwelling}, family #{r.family}; #{r.of_interest}; image, Ancestry.com (\\url{#{r.url}} : accessed #{r.accessed}); citing FHL microfilm #{r.microfilm}."
+      result = "#{r.year} U.S. census, #{r.county} County, #{r.state}, population schedule, #{r.division}, p. #{r.page}, dwelling #{r.dwelling}, family #{r.family}; #{r.of_interest}; image, Ancestry.com (\\url{#{r.url}} : accessed #{r.accessed})"
+      result += "; citing FHL microfilm #{r.microfilm}" if r.microfilm?
+      result += "."
 
 getSourceString = (title) ->
   "\\footnote{#{formatting[sources[title].type] sources[title]}}"
@@ -43,10 +45,20 @@ for person in processed when person.number
       \\item[Spouse] #{person.spouse?.name?.value or 'unknown'}#{if person?.spouse?.name?.value then ' \\textit{' + person.generation + '-' + (person.number + 1) + '}' else ''}#{cite person.spouse?.name}
       \\item[Father] #{person.father or 'unknown'}#{if person.father then ' \\textit{' + (person.generation + 1) + '-' + (person.number * 2) + '}' else ''}
       \\item[Mother] #{person.mother or 'unknown'}#{if person.mother then ' \\textit{' + (person.generation + 1) + '-' + ((person.number * 2) + 1) + '}' else ''}
-      \\item[Residence]\\mbox{}
-          \\begin{description}
-              \\item[1900] somewhere
-          \\end{description}
+  """
+
+  if person.residence?.length
+    results += """
+\n
+    \\item[Residence]\\mbox{}
+        \\begin{description}
+"""
+    for place in person.residence
+      results += "\n            \\item[#{place.years}] #{place.location}"
+    results += "\n        \\end{description}"
+
+  results += """
+
       \\item[Children]
           \\begin{itemize}
               \\item 
