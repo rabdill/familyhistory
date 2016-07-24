@@ -24,6 +24,11 @@ processRelations = (person) ->
       mom.generation = person.generation + 1
       person.mother = mom.name
 
+    # child (in the direct line)
+    kidNumber = if person.number % 2 is 0 then person.number / 2 else (person.number - 1) / 2
+    kid = _.find processed, 'number': kidNumber
+
+    person.children.push prepCites kid.name if kid
     processRelations dad if dad
     processRelations mom if mom
 
@@ -51,6 +56,7 @@ for person in ged
       name:
         value: 'unknown'
         citation: []
+    children: []
 
   for point in person.tree
     switch point.tag

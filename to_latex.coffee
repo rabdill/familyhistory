@@ -57,12 +57,18 @@ for person in processed when person.number
       results += "\n            \\item[#{place.years}] #{place.location}"
     results += "\n        \\end{description}"
 
-  results += """
+  if person.children?.length
+    results += """
+\n
+    \\item[Children]\\mbox{}
+        \\begin{itemize}
+"""
+    for child in person.children
+      results += "\n            \\item #{child.value} \\textit{#{person.generation - 1}-#{if person.number % 2 is 0 then (person.number / 2) else ((person.number - 1) / 2)}}#{cite child}"
+    results += "\n        \\end{itemize}"
+  
 
-      \\item[Children]
-          \\begin{itemize}
-              \\item 
-          \\end{itemize}
+  results += """\n
   \\end{description}
 
 
