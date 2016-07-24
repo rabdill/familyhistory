@@ -8,7 +8,7 @@ processRelations = (person) ->
 
     # spouse
     personFam = _.filter processed, 'fams': person.fams
-    person.spouse = prepCites _.find(personFam, (p) -> p.name isnt person.name)?.name
+    person.spouse.name.value = prepCites _.find(personFam, (p) -> p.name isnt person.name)?.name
 
     # parents:
     parents = _.filter processed, 'fams': person.parentFams
@@ -18,15 +18,11 @@ processRelations = (person) ->
       dad.number = person.number * 2
       dad.generation = person.generation + 1
       person.father = dad.name
-    else
-      person.father = 'unknown'
 
     if mom
       mom.number = (person.number * 2) + 1
       mom.generation = person.generation + 1
       person.mother = mom.name
-    else
-      person.mother = 'unknown'
 
     processRelations dad if dad
     processRelations mom if mom
@@ -51,6 +47,11 @@ for person in ged
       place:
         value: ''
         citation: []
+    spouse:
+      name:
+        value: 'unknown'
+        citation: []
+
   for point in person.tree
     switch point.tag
       when 'BIRT'
