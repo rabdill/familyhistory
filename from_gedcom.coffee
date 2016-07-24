@@ -8,7 +8,7 @@ processRelations = (person) ->
 
     # spouse
     personFam = _.filter processed, 'fams': person.fams
-    person.spouse.name.value = prepCites _.find(personFam, (p) -> p.name isnt person.name)?.name
+    person.spouse.name = prepCites _.find(personFam, (p) -> p.name isnt person.name)?.name
 
     # parents:
     parents = _.filter processed, 'fams': person.parentFams
