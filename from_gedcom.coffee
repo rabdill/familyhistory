@@ -73,10 +73,28 @@ for person in ged
         addition.birth =
           date: prepCites latexFilter findMainValue point, 'DATE'
           place: prepCites latexFilter findInTree point, 'PLAC'
+        # don't allow totally blank entries. This happens if there's a BIRT entry
+        # in the GEDCOM file but no data in it.
+        unless addition.birth.date.value or addition.birth.place.value
+          addition.birth =
+            date:
+              value: 'unknown'
+              citation: []
+            place:
+              value: ''
+              citation: []
       when 'DEAT'
         addition.death =
           date: prepCites latexFilter findMainValue point, 'DATE'
           place: prepCites latexFilter findInTree point, 'PLAC'
+        unless addition.death.date.value or addition.death.place.value
+          addition.death =
+            date:
+              value: 'unknown'
+              citation: []
+            place:
+              value: ''
+              citation: []
       when 'NAME'
         unless addition.name # take the first name entry we find
           addition.name = latexFilter nameFormat point.data
