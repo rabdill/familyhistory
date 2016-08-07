@@ -24,8 +24,17 @@ processRelations = (person) ->
     mom.generation = person.generation + 1
     person.mother = mom.name
 
-  # children
-  person.children.push prepCites kid.name for kid in _.filter processed, 'parentFams': person.fams
+  # child (in the direct line)
+  kidNumber = if person.number % 2 is 0 then person.number / 2 else (person.number - 1) / 2
+  if kid = _.find processed, {'number': kidNumber}
+    primary = prepCites kid.name
+    primary.direct_ancestor = true  # flag this kid as the one that gets a number
+    person.children.push primary
+
+
+  # other children
+  for kid in _.filter processed, {'parentFams': person.fams}
+    person.children.push prepCites kid.name unless kid.number
 
 
   # work our way up the tree

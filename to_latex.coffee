@@ -69,7 +69,10 @@ for person in processed when person.number
         \\begin{itemize}
 """
     for child in person.children
-      results += "\n            \\item #{child.value} \\textit{#{person.generation - 1}-#{if person.number % 2 is 0 then (person.number / 2) else ((person.number - 1) / 2)}}#{cite child}"
+      results += "\n            \\item #{child.value}"
+      if child.direct_ancestor
+        results += " \\textit{#{person.generation - 1}-#{if person.number % 2 is 0 then (person.number / 2) else ((person.number - 1) / 2)}}"
+      results += "#{cite child}"
     results += "\n        \\end{itemize}"
   
 
