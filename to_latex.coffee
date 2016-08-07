@@ -73,15 +73,9 @@ for person in processed when person.number
     results += "\n        \\end{itemize}"
   
 
-  results += """\n
-  \\end{description}
-
-
-  \\paragraph lalala
-
-
-
-  """
+  results += "\n\\end{description}"
+  if person.bio then results += "\n\n\\paragraph #{person.bio}"
+  results += "\n\n"
 
 template = fs.readFileSync('template.tex').toString()
 combined = template.replace '*****FAMILY_GOES_HERE*****', results

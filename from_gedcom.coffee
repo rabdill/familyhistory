@@ -4,33 +4,33 @@ _ = require 'lodash'
 {latexFilter, findInTree, findMainValue, nameFormat, prepCites} = require './utility'
 
 processRelations = (person) ->
-    console.log person.name
+  console.log person.name
 
-    # spouse
-    personFam = _.filter processed, 'fams': person.fams
-    person.spouse.name = prepCites _.find(personFam, (p) -> p.name isnt person.name)?.name
+  # spouse
+  personFam = _.filter processed, 'fams': person.fams
+  person.spouse.name = prepCites _.find(personFam, (p) -> p.name isnt person.name)?.name
 
-    # parents:
-    parents = _.filter processed, 'fams': person.parentFams
-    dad = _.find parents, 'sex': 'M'
-    mom = _.find parents, 'sex': 'F'
-    if dad
-      dad.number = person.number * 2
-      dad.generation = person.generation + 1
-      person.father = dad.name
+  # parents:
+  parents = _.filter processed, 'fams': person.parentFams
+  dad = _.find parents, 'sex': 'M'
+  mom = _.find parents, 'sex': 'F'
+  if dad
+    dad.number = person.number * 2
+    dad.generation = person.generation + 1
+    person.father = dad.name
 
-    if mom
-      mom.number = (person.number * 2) + 1
-      mom.generation = person.generation + 1
-      person.mother = mom.name
+  if mom
+    mom.number = (person.number * 2) + 1
+    mom.generation = person.generation + 1
+    person.mother = mom.name
 
-    # child (in the direct line)
-    kidNumber = if person.number % 2 is 0 then person.number / 2 else (person.number - 1) / 2
-    kid = _.find processed, 'number': kidNumber
+  # children
+  person.children.push prepCites kid.name for kid in _.filter processed, 'parentFams': person.fams
 
-    person.children.push prepCites kid.name if kid
-    processRelations dad if dad
-    processRelations mom if mom
+
+  # work our way up the tree
+  processRelations dad if dad
+  processRelations mom if mom
 
 # load the GEDCOM file
 raw = fs.readFileSync('abdills.ged').toString()
@@ -69,7 +69,8 @@ for person in ged
           date: prepCites latexFilter findMainValue point, 'DATE'
           place: prepCites latexFilter findInTree point, 'PLAC'
       when 'NAME'
-        addition.name = latexFilter nameFormat point.data
+        unless addition.name # take the first name entry we find
+          addition.name = latexFilter nameFormat point.data
       when 'SEX'
         addition.sex = latexFilter point.data
       when 'FAMC'
