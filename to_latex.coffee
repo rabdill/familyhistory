@@ -2,6 +2,7 @@ parser = require 'parse-gedcom'
 fs = require 'fs'
 _ = require 'lodash'
 sources = require './sources'
+config = require './config'
 
 formatting =
   census: (r) ->
@@ -19,7 +20,10 @@ formatting =
       r.included = true
       "\\textit{Find A Grave}, database with images (\\url{https://www.findagrave.com/cgi-bin/fg.cgi?page=gr&amp;GRid=#{r.number}} : accessed #{r.accessed}), memorial #{r.number}; #{r.names}; #{r.cemetery}, #{r.location}; gravestone added by #{r.credit}."
 getSourceString = (title) ->
-  "\\footnote{#{formatting[sources[title].type] sources[title]}}"
+  if formatting[sources[title].type]
+    "\\footnote{#{formatting[sources[title].type] sources[title]}}"
+  else
+    "\\footnote{unrecognized reference type.}"
 
 
 cite = (fact) ->
@@ -81,5 +85,7 @@ for person in processed when person.number
   results += "\n\n"
 
 template = fs.readFileSync('template.tex').toString()
-combined = template.replace '*****FAMILY_GOES_HERE*****', results
+combined = template.replace '*****TITLE_GOES_HERE*****', config.title
+combined = combined.replace '*****AUTHOR_GOES_HERE*****', "By #{config.author}"
+combined = combined.replace '*****FAMILY_GOES_HERE*****', results
 fs.writeFileSync 'results.tex', combined
