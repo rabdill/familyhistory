@@ -64,7 +64,7 @@ for person in processed when person.number
   \\begin{description}
       \\item[Birth] #{person.birth?.date.value}#{if person.birth?.date.value and person.birth?.place.value then ',' else ''}#{cite person.birth?.date}#{if person.birth?.date.value and person.birth?.place.value then ' ' else ''}#{person.birth?.place.value}#{cite person.birth?.place}
       \\item[Death] #{person.death?.date.value}#{if person.death?.date.value and person.death?.place.value then ',' else ''}#{cite person.death?.date}#{if person.death?.date.value and person.death?.place.value then ' ' else ''}#{person.death?.place.value}#{cite person.death?.place}
-      \\item[Spouse] #{person.spouse?.name?.value or 'unknown'}#{if person?.spouse?.name?.value then ' \\textit{' + person.generation + '-' + (person.number + 1) + '}' else ''}#{cite person.spouse?.name}#{if person.spouse.date?.value then ", married " + person.spouse.date.value}#{cite person.spouse?.date}
+      \\item[Spouse] #{person.spouse?.name?.value or 'unknown'}#{if person?.spouse?.name?.value then ' \\textit{' + person.generation + '-' + (person.number + 1) + '}' else ''}#{cite person.spouse?.name}#{if person.spouse.date?.value then ", married " + person.spouse.date.value else ""}#{cite person.spouse?.date or ""}
       \\item[Father] #{person.father or 'unknown'}#{if person.father then ' \\textit{' + (person.generation + 1) + '-' + (person.number * 2) + '}' else ''}
       \\item[Mother] #{person.mother or 'unknown'}#{if person.mother then ' \\textit{' + (person.generation + 1) + '-' + ((person.number * 2) + 1) + '}' else ''}
   """
