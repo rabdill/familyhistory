@@ -4,6 +4,8 @@ _ = require 'lodash'
 sources = require './sources'
 config = require './config'
 
+previous_footnote = null
+
 formatting =
   census: (r) ->
     if r.included is true
@@ -20,10 +22,15 @@ formatting =
       r.included = true
       "\\textit{Find A Grave}, database with images (\\url{https://www.findagrave.com/cgi-bin/fg.cgi?page=gr&amp;GRid=#{r.number}} : accessed #{r.accessed}), memorial #{r.number}; #{r.names}; #{r.cemetery}, #{r.location}; gravestone added by #{r.credit}."
 getSourceString = (title) ->
-  if formatting[sources[title].type]
-    "\\footnote{#{formatting[sources[title].type] sources[title]}}"
+  if sources[title] is previous_footnote
+    answer = "\\footnote{Ibid.}"
   else
-    "\\footnote{unrecognized reference type.}"
+    if formatting[sources[title].type]
+      answer = "\\footnote{#{formatting[sources[title].type] sources[title]}}"
+    else
+      answer = "\\footnote{unrecognized reference type.}"
+  previous_footnote = sources[title]  # this comes after the call to format it because the item may be modified
+  answer
 
 
 cite = (fact) ->
