@@ -69,14 +69,14 @@ for person in processed when person.number
       \\item[Mother] #{person.mother or 'unknown'}#{if person.mother then ' \\textit{' + (person.generation + 1) + '-' + ((person.number * 2) + 1) + '}' else ''}
   """
 
-  if person.residence?.length
+  if Object.keys(person.residence or {}).length
     results += """
 \n
-    \\item[Residence]\\mbox{}
-        \\begin{description}
+      \\item[Residence]\\mbox{}
+          \\begin{description}
 """
-    for place in person.residence
-      results += "\n            \\item[#{place.years}] #{place.location}"
+    for year, info of person.residence
+      results += "\n            \\item[#{year}] #{info.place}#{if info.address then " (" + info.address + ")" else ""}#{cite info}"
     results += "\n        \\end{description}"
 
   if person.children?.length
